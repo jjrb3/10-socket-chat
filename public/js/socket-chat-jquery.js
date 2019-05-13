@@ -33,21 +33,66 @@ function renderizarUsuarios(personas) {
 }
 
 
-function renderizarMensajes(mensaje) {
+function renderizarMensajes(mensaje, yo) {
 
     var html = '';
+    var fecha = new Date(mensaje.fecha);
+    var hora = fecha.getHours() + ':' + fecha.getHours();
+    var adminClass = 'info';
 
-    html += '<li class="animated fadeIn">';
-    html += '<div class="chat-img"><img src="assets/images/users/1.jpg" alt="user" /></div>';
-    html += '<div class="chat-content">';
-    html += '<h5>' + mensaje.nombre + '</h5>';
-    html += '<div class="box bg-light-info">' + mensaje.mensaje + '</div>';
-    html += '</div>';
-    html += '<div class="chat-time">10:56 am</div>';
-    html += '</li>';
+    if (mensaje.nombre === 'Administrador') {
+        adminClass = 'danger';
+    }
+
+
+    if (yo) {
+
+        html += '<li class="reverse">';
+        html += '<div class="chat-content">';
+        html += '<h5>' + mensaje.nombre + '</h5>';
+        html += '<div class="box bg-light-inverse">' + mensaje.mensaje + '</div>';
+        html += '</div>';
+        html += '<div class="chat-img"><img src="assets/images/users/5.jpg" alt="user" /></div>';
+        html += '<div class="chat-time">' + hora + '</div>';
+        html += '</li>';
+    }
+    else {
+
+        html += '<li class="animated fadeIn">';
+
+        if (mensaje.nombre !== 'Administrador') {
+            html += '<div class="chat-img"><img src="assets/images/users/1.jpg" alt="user" /></div>';
+        }
+
+        html += '<div class="chat-content">';
+        html += '<h5>' + mensaje.nombre + '</h5>';
+        html += '<div class="box bg-light-' + adminClass + '">' + mensaje.mensaje + '</div>';
+        html += '</div>';
+        html += '<div class="chat-time">' + hora + '</div>';
+        html += '</li>';
+    }
 
     divChatbox.append(html);
 }
+
+
+function scrollBottom() {
+
+    // selectors
+    var newMessage = divChatbox.children('li:last-child');
+
+    // heights
+    var clientHeight = divChatbox.prop('clientHeight');
+    var scrollTop = divChatbox.prop('scrollTop');
+    var scrollHeight = divChatbox.prop('scrollHeight');
+    var newMessageHeight = newMessage.innerHeight();
+    var lastMessageHeight = newMessage.prev().innerHeight() || 0;
+
+    if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+        divChatbox.scrollTop(scrollHeight);
+    }
+}
+
 
 // Listener
 divUsuarios.on('click','a', function () {
@@ -67,16 +112,12 @@ formEnviar.on('submit', function (e) {
        return;
    }
 
-   console.log('pasó', usuario, textMessage.val());
-
-
     socket.emit('crearMensaje', {
         nombre: usuario,
         mensaje: textMessage.val()
     }, function(mensaje) {
-
         textMessage.val('').focus();
-
-        renderizarMensajes(mensaje);
+        renderizarMensajes(mensaje, true);
+        scrollBottom()
     });
 });
