@@ -1,7 +1,15 @@
 
 var params = new URLSearchParams(window.location.search);
 
+var usuario = params.get('nombre');
+var sala = params.get('sala');
+
+// Referencias jQuery
 var divUsuarios = $('#divUsuarios');
+var formEnviar  = $('#form-enviar');
+var textMessage = $('#text-message');
+var divChatbox  = $('#divChatbox');
+
 
 
 function renderizarUsuarios(personas) {
@@ -25,6 +33,22 @@ function renderizarUsuarios(personas) {
 }
 
 
+function renderizarMensajes(mensaje) {
+
+    var html = '';
+
+    html += '<li class="animated fadeIn">';
+    html += '<div class="chat-img"><img src="assets/images/users/1.jpg" alt="user" /></div>';
+    html += '<div class="chat-content">';
+    html += '<h5>' + mensaje.nombre + '</h5>';
+    html += '<div class="box bg-light-info">' + mensaje.mensaje + '</div>';
+    html += '</div>';
+    html += '<div class="chat-time">10:56 am</div>';
+    html += '</li>';
+
+    divChatbox.append(html);
+}
+
 // Listener
 divUsuarios.on('click','a', function () {
    var id = $(this).data('id');
@@ -32,4 +56,27 @@ divUsuarios.on('click','a', function () {
    if (id) {
        console.log(id);
    }
+});
+
+
+formEnviar.on('submit', function (e) {
+
+    e.preventDefault();
+
+   if (textMessage.val().trim().length === 0) {
+       return;
+   }
+
+   console.log('pasó', usuario, textMessage.val());
+
+
+    socket.emit('crearMensaje', {
+        nombre: usuario,
+        mensaje: textMessage.val()
+    }, function(mensaje) {
+
+        textMessage.val('').focus();
+
+        renderizarMensajes(mensaje);
+    });
 });
