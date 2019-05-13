@@ -23,3 +23,13 @@ function renderizarUsuarios(personas) {
 
     divUsuarios.html(html);
 }
+
+
+// Listener
+divUsuarios.on('click','a', function () {
+   var id = $(this).data('id');
+
+   if (id) {
+       console.log(id);
+   }
+});
